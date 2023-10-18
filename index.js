@@ -1,15 +1,12 @@
 const express = require('express')
 const cors=require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000;
 
 app.use(cors())
 app.use(express.json())
 
-
-// rifat43
-// ggNnjhmr1RAfQ3iG
 
 
 
@@ -28,12 +25,28 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    const database=client.db('brandShopDB').collection('shopData')
+    const dataBase=client.db('brandShopDB');
+    const productCollection=dataBase.collection('shopData');
+
 
     app.post('/products',async(req,res)=>{
         const newProducts=req.body;
-        const result=await database.insertOne(newProducts)
+        const result=await productCollection.insertOne(newProducts)
         res.send(result)
+    })
+
+    app.get('/products',async(req,res)=>{
+      const cursor=productCollection.find();
+      const result=await cursor.toArray();
+      res.send(result)
+
+    })
+
+    app.get('/products/:brandName',async(req,res)=>{
+      const brandName=req.params.brandName;
+      const query={brandName}
+      const result=await productCollection.find(query).toArray()
+       res.send(result)
     })
 
 
