@@ -1,5 +1,5 @@
 const express = require('express')
-const cors=require('cors')
+const cors = require('cors')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000;
@@ -25,42 +25,87 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    const dataBase=client.db('brandShopDB');
-    const productCollection=dataBase.collection('shopData');
+    const dataBase = client.db('brandShopDB');
+    const productCollection = dataBase.collection('shopData');
+    const addCartCollection = dataBase.collection('cartData')
 
 
-    app.post('/products',async(req,res)=>{
-        const newProducts=req.body;
-        const result=await productCollection.insertOne(newProducts)
-        res.send(result)
+    app.post('/products', async (req, res) => {
+      const newProducts = req.body;
+      const result = await productCollection.insertOne(newProducts)
+      res.send(result)
     })
 
-    app.get('/products',async(req,res)=>{
-      const cursor=productCollection.find();
-      const result=await cursor.toArray();
+    app.get('/products', async (req, res) => {
+      const cursor = productCollection.find();
+      const result = await cursor.toArray();
       res.send(result)
 
     })
 
-    
 
-    
 
-    app.get('/products/id/:id',async(req,res)=>{
-      const id=req.params.id;
-      const query={_id:new ObjectId(id)}
-      const result=await productCollection.findOne(query)
-       res.send(result)
+
+
+    app.get('/products/id/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await productCollection.findOne(query)
+      res.send(result)
     })
 
-    app.get('/products/brand/:brandName',async(req,res)=>{
-      const brandName=req.params.brandName;
-      const query={brandName}
-      const result=await productCollection.find(query).toArray()
-       res.send(result)
+    app.get('/products/brand/:brandName', async (req, res) => {
+      const brandName = req.params.brandName;
+      const query = { brandName }
+      const result = await productCollection.find(query).toArray()
+      res.send(result)
     })
 
-   
+
+    // add cart system
+
+    app.post('/carts', async (req, res) => {
+      const cartProduct = req.body;
+      const result = await addCartCollection.insertOne(cartProduct)
+      res.send(result)
+    })
+
+    app.get('/carts', async (req, res) => {
+      const cursor = addCartCollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    // update product
+
+    app.get('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await productCollection.findOne(query)
+      res.send(result)
+    })
+
+    app.put('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true }
+      const updateProduct = req.body;
+      const product = {
+        $set: {
+          image: updateProduct.image,
+          name: updateProduct.name,
+          brandName: updateProduct.brandName,
+          type: updateProduct.type,
+          price: updateProduct.price,
+          shortDescription: updateProduct.shortDescription,
+          rating: updateProduct.rating,
+        }
+      }
+
+      const result=await productCollection.updateOne(filter,product,options)
+      res.send(result)
+    })
+
 
 
     // Send a ping to confirm a successful connection
