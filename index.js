@@ -66,8 +66,13 @@ async function run() {
 
     app.post('/carts', async (req, res) => {
       const cartProduct = req.body;
+      const productDetails=await addCartCollection.findOne({_id:cartProduct._id})
+      if(productDetails){
+       return res.send({msg:'Already Added'})
+      }
+      
       const result = await addCartCollection.insertOne(cartProduct)
-      res.send(result)
+        res.send(result)
     })
 
     app.get('/carts', async (req, res) => {
@@ -119,7 +124,7 @@ async function run() {
     app.get('/carts/:id', async (req, res) => {
       const id = req.params.id;
       const query = { id }
-      const result = await addCartCollection.findOne(query)
+      const result = await addCartCollection.findOne(query).toArray()
       res.send(result)
     })
 
