@@ -42,13 +42,25 @@ async function run() {
 
     })
 
-    app.get('/products/:brandName',async(req,res)=>{
+    
+
+    
+
+    app.get('/products/id/:id',async(req,res)=>{
+      const id=req.params.id;
+      const query={_id:new ObjectId(id)}
+      const result=await productCollection.findOne(query)
+       res.send(result)
+    })
+
+    app.get('/products/brand/:brandName',async(req,res)=>{
       const brandName=req.params.brandName;
       const query={brandName}
       const result=await productCollection.find(query).toArray()
        res.send(result)
     })
 
+   
 
 
     // Send a ping to confirm a successful connection
