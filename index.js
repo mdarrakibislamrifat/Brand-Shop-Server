@@ -69,7 +69,7 @@ async function run() {
 
     app.post('/carts', async (req, res) => {
       const cartProduct = req.body;
-      const productDetails=await addCartCollection.findOne({_id:cartProduct._id})
+      const productDetails=await addCartCollection.findOne({id:cartProduct.id,email:cartProduct.email})
       if(productDetails){
        return res.send({msg:'Already Added'})
       }
@@ -78,10 +78,16 @@ async function run() {
         res.send(result)
     })
 
-    app.get('/carts', async (req, res) => {
-      const cursor =await addCartCollection.find();
-      const result = await cursor.toArray();
-      res.send(result)
+    app.get('/carts/:email', async (req, res) => {
+      // const cursor =await addCartCollection.find();
+      const email=req.params.email;
+      console.log(email)
+      const carts=await addCartCollection.find({email}).toArray()
+      // const result = await cursor.toArray();
+      if(!carts){
+       return res.send([])
+      }
+      res.send(carts)
     })
 
     // update product
@@ -117,9 +123,10 @@ async function run() {
 
     // delete item
 
-    app.delete('/carts/:id',async(req,res)=>{
+    app.delete('/carts/:id/:email',async(req,res)=>{
       const id=req.params.id;
-      const query={_id:id}
+      const email=req.params.email;
+      const query={id,email}
       const result=await addCartCollection.deleteOne(query)
       res.send(result)
     })
